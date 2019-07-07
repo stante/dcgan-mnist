@@ -31,11 +31,13 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
 
     G = model.DCGANModelGenerator(latent_vector)
     D = model.DCGANModelDiscriminator()
-    g_optimizer = optim.Adam(G.parameters(), lr=0.0002, betas=(0.5, 0.999))
-    d_optimizer = optim.Adam(D.parameters(), lr=0.0002, betas=(0.5, 0.999))
-    criterion = nn.BCEWithLogitsLoss()
     G.to(device)
     D.to(device)
+
+    g_optimizer = optim.Adam(G.parameters(), lr=0.0002, betas=(0.5, 0.999))
+    d_optimizer = optim.Adam(D.parameters(), lr=0.0002, betas=(0.5, 0.999))
+
+    criterion = nn.BCEWithLogitsLoss()
 
     for epoch in range(1, epochs + 1):
         generator_loss = 0
@@ -43,31 +45,30 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
         g_acc = 0
         for real_images, y_label in trainloader:
             real_images = real_images.to(device)
-            # y_label = y_label.to(device)
 
             # Discriminator
-            # discriminator.train()
-            # generator.eval()
+            # D.train()
+            # G.eval()
 
             d_optimizer.zero_grad()
 
             z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
             fake_images = G.forward(z)
             out = D.forward(torch.cat([real_images, fake_images]))
-            dloss = criterion(out, torch.cat((torch.ones_like(y_label, dtype=torch.float32, device=device),
+            dloss = criterion(out, torch.cat((torch.ones_like(y_label, dtype=torch.float32, device=device) * 0.9,
                                               torch.zeros_like(y_label, dtype=torch.float32, device=device))))
             dloss.backward()
             d_optimizer.step()
 
             # Generator
-            # discriminator.eval()
-            # generator.train()
+            # D.eval()
+            # G.train()
 
             g_optimizer.zero_grad()
             z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
             fake_images = G.forward(z)
             out = D.forward(fake_images)
-            gloss = criterion(out, torch.ones_like(out, dtype=torch.float32, device=device))
+            gloss = criterion(out, torch.ones_like(out, dtype=torch.float32, device=device) * 0.9)
 
             gloss.backward()
             g_optimizer.step()
