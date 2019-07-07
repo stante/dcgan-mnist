@@ -97,6 +97,8 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
     with open('generated_images.pkl', 'wb') as f:
         pickle.dump(images, f)
 
+    torch.save(G.state_dict(), "generator.pth")
+
 
 if __name__ == '__main__':
     main()
