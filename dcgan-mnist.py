@@ -29,49 +29,49 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
     trainloader = dataloader.DataLoader(dataset=trainset, batch_size=batch_size, shuffle=True, drop_last=True)
     testloader = dataloader.DataLoader(dataset=testset, batch_size=batch_size, shuffle=True, drop_last=True)
 
-    generator = model.DCGANModelGenerator(latent_vector)
-    discriminator = model.DCGANModelDiscriminator()
-    gen_optim = optim.Adam(generator.parameters(), lr=0.0002, betas=(0.5, 0.999))
-    disc_optim = optim.Adam(discriminator.parameters(), lr=0.0002, betas=(0.5, 0.999))
+    G = model.DCGANModelGenerator(latent_vector)
+    D = model.DCGANModelDiscriminator()
+    g_optimizer = optim.Adam(G.parameters(), lr=0.0002, betas=(0.5, 0.999))
+    d_optimizer = optim.Adam(D.parameters(), lr=0.0002, betas=(0.5, 0.999))
     criterion = nn.BCEWithLogitsLoss()
-    generator.to(device)
-    discriminator.to(device)
+    G.to(device)
+    D.to(device)
 
     for epoch in range(1, epochs + 1):
         generator_loss = 0
         discriminator_loss = 0
         g_acc = 0
-        for x_image, y_label in trainloader:
-            x_image = x_image.to(device)
+        for real_images, y_label in trainloader:
+            real_images = real_images.to(device)
             # y_label = y_label.to(device)
 
             # Discriminator
             # discriminator.train()
             # generator.eval()
 
-            disc_optim.zero_grad()
-            gen_optim.zero_grad()
+            d_optimizer.zero_grad()
+
             z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
-            x_gen = generator.forward(z)
-            out = discriminator.forward(torch.cat([x_image, x_gen]))
+            fake_images = G.forward(z)
+            out = D.forward(torch.cat([real_images, fake_images]))
             dloss = criterion(out, torch.cat((torch.ones_like(y_label, dtype=torch.float32, device=device),
                                               torch.zeros_like(y_label, dtype=torch.float32, device=device))))
             dloss.backward()
-            disc_optim.step()
+            d_optimizer.step()
 
             # Generator
             # discriminator.eval()
             # generator.train()
 
-            gen_optim.zero_grad()
-            disc_optim.zero_grad()
+            g_optimizer.zero_grad()
             z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
-            x_gen = generator.forward(z)
-            out = discriminator.forward(x_gen)
+            fake_images = G.forward(z)
+            out = D.forward(fake_images)
             gloss = criterion(out, torch.ones_like(out, dtype=torch.float32, device=device))
 
             gloss.backward()
-            gen_optim.step()
+            g_optimizer.step()
+
             g_acc += torch.round(torch.sum(F.sigmoid(out))) / out.shape[0]
             generator_loss += gloss.item()
             discriminator_loss += dloss.item()
