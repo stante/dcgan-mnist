@@ -7,6 +7,7 @@ import torch.optim as optim
 import torch.nn as nn
 import torch.nn.functional as F
 import model
+import pickle
 
 
 @click.command()
@@ -39,6 +40,9 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
 
     criterion = nn.BCEWithLogitsLoss()
 
+    z_fixed = torch.rand((16, latent_vector), device=device) * 2 - 1
+    images = []
+
     for epoch in range(1, epochs + 1):
         generator_loss = 0
         discriminator_loss = 0
@@ -63,6 +67,7 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
 
             # Generator
             g_optimizer.zero_grad()
+            d_optimizer.zero_grad()
             z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
             fake_images = G.forward(z)
             out = D.forward(fake_images)
@@ -71,7 +76,7 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
             gloss.backward()
             g_optimizer.step()
 
-            g_acc += torch.round(torch.sum(F.sigmoid(out))) / out.shape[0]
+            g_acc += torch.sum(torch.round(torch.sigmoid(out))) / batch_size
             generator_loss += gloss.item()
             discriminator_loss += d_loss.item()
 
@@ -80,6 +85,17 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
         discriminator_loss /= len(trainloader)
         print("Epoch: {} G-Loss: {:.4f} D-Loss: {:.4f} G-Acc: {:.4}".format(epoch, generator_loss,
                                                                             discriminator_loss, g_acc))
+
+        G.eval()
+        image = G.forward(z_fixed)
+        image = (image + 1) / 2
+        image = image.view(16, 32, 32).detach().cpu().numpy()
+
+        images.append(image)
+        G.train()
+
+    with open('generated_images.pkl', 'wb') as f:
+        pickle.dump(images, f)
 
 
 if __name__ == '__main__':
