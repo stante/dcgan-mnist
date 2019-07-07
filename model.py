@@ -34,10 +34,21 @@ class DCGANModelDiscriminator(nn.Module):
     def __init__(self):
         super(DCGANModelDiscriminator, self).__init__()
 
-        self.linear = nn.Linear(32 * 32, 1)
+        self.conv = nn.Sequential(
+            nn.Conv2d(1, 64, 3, stride=2, padding=2),
+            nn.BatchNorm2d(64),
+            nn.LeakyReLU(negative_slope=0.2),
+            nn.Conv2d(64, 128, 3, stride=2, padding=2),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(negative_slope=0.2),
+            nn.Conv2d(128, 256, 3, stride=2, padding=2),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(negative_slope=0.2),
+            nn.Conv2d(256, 1, 4, stride=4),
+            nn.Sigmoid()
+        )
 
     def forward(self, x):
-        x = self.linear(x.view(x.shape[0], -1))
-        x = torch.sigmoid(x)
+        x = self.conv(x)
 
         return x
