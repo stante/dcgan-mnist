@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class DCGANModelGenerator(nn.Module):
@@ -25,8 +26,8 @@ class DCGANModelGenerator(nn.Module):
 
     def forward(self, x):
         x = self.bn(self.project(x))
-        x = nn.ReLU(x)
-        x = self.conv(self.conv1(x.view(4, 4, -1)))
+        x = F.relu(x)
+        x = self.conv(x.view(x.shape[0], -1, 4, 4))
 
         return x
 
