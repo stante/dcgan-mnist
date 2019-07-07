@@ -7,20 +7,17 @@ class DCGANModelGenerator(nn.Module):
         super(DCGANModelGenerator, self).__init__()
 
         self.latent_dim = latent_dim
-        self.project = nn.Linear(latent_dim, 4 * 4 * 1024)
-        self.bn = nn.BatchNorm1d(4 * 4 * 1024)
+        self.project = nn.Linear(latent_dim, 4 * 4 * 512)
+        self.bn = nn.BatchNorm1d(4 * 4 * 512)
 
         self.conv = nn.Sequential(
-            nn.ConvTranspose2d(1024, 512, kernel_size=2, stride=2, bias=False),
-            nn.BatchNorm2d(512),
-            nn.ReLU(),
             nn.ConvTranspose2d(512, 256, kernel_size=2, stride=2, bias=False),
             nn.BatchNorm2d(256),
             nn.ReLU(),
             nn.ConvTranspose2d(256, 128, kernel_size=2, stride=2, bias=False),
             nn.BatchNorm2d(128),
             nn.ReLU(),
-            nn.ConvTranspose2d(128, 3, kernel_size=2, stride=2),
+            nn.ConvTranspose2d(128, 1, kernel_size=2, stride=2),
             nn.Tanh()
         )
 
