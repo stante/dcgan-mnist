@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
+import torch
 
 
 class DCGANModelGenerator(nn.Module):
@@ -33,10 +34,10 @@ class DCGANModelDiscriminator(nn.Module):
     def __init__(self):
         super(DCGANModelDiscriminator, self).__init__()
 
-        self.linear = nn.Linear(3 * 32 * 32, 1)
+        self.linear = nn.Linear(32 * 32, 1)
 
     def forward(self, x):
-        x = self.linear(x.view(-1))
-        x = nn.Sigmoid(x)
+        x = self.linear(x.view(x.shape[0], -1))
+        x = torch.sigmoid(x)
 
         return x
