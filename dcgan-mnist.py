@@ -47,35 +47,33 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
             real_images = real_images.to(device)
 
             # Discriminator
-            # D.train()
-            # G.eval()
-
             d_optimizer.zero_grad()
 
             z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
             fake_images = G.forward(z)
-            out = D.forward(torch.cat([real_images, fake_images]))
-            dloss = criterion(out, torch.cat((torch.ones_like(y_label, dtype=torch.float32, device=device) * 0.9,
-                                              torch.zeros_like(y_label, dtype=torch.float32, device=device))))
-            dloss.backward()
+
+            # Real images
+            real_out = D.forward(real_images)
+            real_d_loss = criterion(real_out, torch.ones_like(y_label, dtype=torch.float32, device=device))
+            fake_out = D.forward(fake_images)
+            fake_d_loss = criterion(fake_out, torch.zeros_like(y_label, dtype=torch.float32, device=device))
+            d_loss = real_d_loss + fake_d_loss
+            d_loss.backward()
             d_optimizer.step()
 
             # Generator
-            # D.eval()
-            # G.train()
-
             g_optimizer.zero_grad()
             z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
             fake_images = G.forward(z)
             out = D.forward(fake_images)
-            gloss = criterion(out, torch.ones_like(out, dtype=torch.float32, device=device) * 0.9)
+            gloss = criterion(out, torch.ones_like(out, dtype=torch.float32, device=device))
 
             gloss.backward()
             g_optimizer.step()
 
             g_acc += torch.round(torch.sum(F.sigmoid(out))) / out.shape[0]
             generator_loss += gloss.item()
-            discriminator_loss += dloss.item()
+            discriminator_loss += d_loss.item()
 
         g_acc /= len(trainloader)
         generator_loss /= len(trainloader)
