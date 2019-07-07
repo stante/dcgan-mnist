@@ -33,7 +33,12 @@ class DCGANModelGenerator(nn.Module):
 
 class DCGANModelDiscriminator(nn.Module):
     def __init__(self):
-        pass
+        super(DCGANModelDiscriminator, self).__init__()
+
+        self.linear = nn.Linear(3 * 32 * 32, 1)
 
     def forward(self, x):
-        pass
+        x = self.linear(x.view(-1))
+        x = nn.Sigmoid(x)
+
+        return x
