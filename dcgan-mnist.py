@@ -8,7 +8,8 @@ import torch
 @click.command()
 @click.option('--root', default="~/.torch/mnist", help="Root directory for MNIST dataset")
 @click.option('--batch-size', default=128, help="Batch size")
-def main(root, batch_size):
+@click.option('--latent-vector', default=100, help="Size of latent vector Z")
+def main(root, batch_size, latent_vector):
     transform = transforms.Compose([transforms.ToTensor(),
                                     transforms.Lambda(lambda x: x * 2 - 1)])
     trainset = mnist.MNIST(root=root, download=True, train=True, transform=transform)
@@ -17,6 +18,7 @@ def main(root, batch_size):
     testloader = dataloader.DataLoader(dataset=testset, batch_size=batch_size, shuffle=True, drop_last=True)
 
     for x_image, y_label in trainloader:
+        z = torch.rand((latent_vector, 1)) * 2 - 1
         pass
 
 
