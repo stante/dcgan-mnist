@@ -43,6 +43,7 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
             x_image = x_image.to(device)
             # y_label = y_label.to(device)
 
+            # Discriminator
             discriminator.train()
             generator.eval()
 
@@ -55,6 +56,7 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
             dloss.backward()
             disc_optim.step()
 
+            # Generator
             discriminator.eval()
             generator.train()
 
