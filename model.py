@@ -9,7 +9,7 @@ class DCGANModelGenerator(nn.Module):
 
         self.latent_dim = latent_dim
         self.project = nn.Linear(latent_dim, 4 * 4 * 256)
-        self.bn = nn.BatchNorm1d(4 * 4 * 256)
+        # self.bn = nn.BatchNorm1d(4 * 4 * 256)
 
         self.conv = nn.Sequential(
             nn.ConvTranspose2d(256, 128, kernel_size=2, stride=2, bias=False),
@@ -23,7 +23,7 @@ class DCGANModelGenerator(nn.Module):
         )
 
     def forward(self, x):
-        x = self.bn(self.project(x))
+        x = self.project(x)
         x = F.relu(x)
         x = self.conv(x.view(x.shape[0], -1, 4, 4))
 
