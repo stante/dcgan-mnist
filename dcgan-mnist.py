@@ -10,10 +10,11 @@ import model
 
 @click.command()
 @click.option('--root', default="~/.torch/mnist", help="Root directory for MNIST dataset")
+@click.option('--epochs', default=10, help="Number of epochs")
 @click.option('--batch-size', default=128, help="Batch size")
 @click.option('--latent-vector', default=100, help="Size of latent vector Z")
 @click.option('--disable-cuda', default=False, help="Disable CUDA acceleration")
-def main(root, batch_size, latent_vector, disable_cuda):
+def main(root, epochs, batch_size, latent_vector, disable_cuda):
     if not disable_cuda and torch.cuda.is_available():
         device = torch.device('cuda')
     else:
@@ -35,33 +36,43 @@ def main(root, batch_size, latent_vector, disable_cuda):
     generator.to(device)
     discriminator.to(device)
 
-    for x_image, y_label in trainloader:
-        x_image = x_image.to(device)
-        # y_label = y_label.to(device)
+    for epoch in range(1, epochs + 1):
+        generator_loss = 0
+        discriminator_loss = 0
+        for x_image, y_label in trainloader:
+            x_image = x_image.to(device)
+            # y_label = y_label.to(device)
 
-        discriminator.train()
-        generator.eval()
+            discriminator.train()
+            generator.eval()
 
-        disc_optim.zero_grad()
-        z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
-        x_gen = generator.forward(z)
-        out = discriminator.forward(torch.cat([x_image, x_gen]))
-        dloss = criterion(out, torch.cat((torch.ones_like(y_label, dtype=torch.float32, device=device),
-                                          torch.zeros_like(y_label, dtype=torch.float32, device=device))))
-        dloss.backward()
-        disc_optim.step()
+            disc_optim.zero_grad()
+            z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
+            x_gen = generator.forward(z)
+            out = discriminator.forward(torch.cat([x_image, x_gen]))
+            dloss = criterion(out, torch.cat((torch.ones_like(y_label, dtype=torch.float32, device=device),
+                                              torch.zeros_like(y_label, dtype=torch.float32, device=device))))
+            dloss.backward()
+            disc_optim.step()
 
-        discriminator.eval()
-        generator.train()
+            discriminator.eval()
+            generator.train()
 
-        gen_optim.zero_grad()
-        z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
-        x_gen = generator.forward(z)
-        out = discriminator.forward(x_gen)
-        gloss = criterion(out, torch.ones_like(out, dtype=torch.float32, device=device))
+            gen_optim.zero_grad()
+            z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
+            x_gen = generator.forward(z)
+            out = discriminator.forward(x_gen)
+            gloss = criterion(out, torch.ones_like(out, dtype=torch.float32, device=device))
 
-        gloss.backward()
-        gen_optim.step()
+            gloss.backward()
+            gen_optim.step()
+
+            generator_loss += gloss.item()
+            discriminator_loss += dloss.item()
+
+        generator_loss /= len(trainloader)
+        discriminator_loss /= len(trainloader)
+        print("Epoch: {} G-Loss: {:.4f} D-Loss: {:.4f}".format(epoch, generator_loss, discriminator_loss))
 
 
 if __name__ == '__main__':
