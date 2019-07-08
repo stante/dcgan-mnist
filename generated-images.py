@@ -12,7 +12,7 @@ def main(in_file, out_dir):
     with open(in_file, 'rb') as f:
         images = pickle.load(f)
 
-    num_digits = int(math.log(len(images))) + 1
+    num_digits = int(math.log(len(images), 10)) + 1
     for n, image in enumerate(images):
         fig = plt.figure()
 
