@@ -80,24 +80,28 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
             generator_loss += gloss.item()
             discriminator_loss += d_loss.item()
 
+            images.append(draw_image(G, z_fixed))
+
         g_acc /= len(trainloader)
         generator_loss /= len(trainloader)
         discriminator_loss /= len(trainloader)
         print("Epoch: {} G-Loss: {:.4f} D-Loss: {:.4f} G-Acc: {:.4}".format(epoch, generator_loss,
                                                                             discriminator_loss, g_acc))
 
-        G.eval()
-        image = G.forward(z_fixed)
-        image = (image + 1) / 2
-        image = image.view(16, 32, 32).detach().cpu().numpy()
-
-        images.append(image)
-        G.train()
-
     with open('generated_images.pkl', 'wb') as f:
         pickle.dump(images, f)
 
     torch.save(G.state_dict(), "generator.pth")
+
+
+def draw_image(generator, z):
+    generator.eval()
+    image = generator.forward(z)
+    image = (image + 1) / 2
+    image = image.view(16, 32, 32).detach().cpu().numpy()
+    generator.train()
+
+    return image
 
 
 if __name__ == '__main__':
