@@ -58,7 +58,7 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
 
             # Real images
             real_out = D.forward(real_images)
-            real_d_loss = criterion(real_out, torch.ones_like(y_label, dtype=torch.float32, device=device))
+            real_d_loss = criterion(real_out, torch.ones_like(y_label, dtype=torch.float32, device=device) * 0.9)
             fake_out = D.forward(fake_images)
             fake_d_loss = criterion(fake_out, torch.zeros_like(y_label, dtype=torch.float32, device=device))
             d_loss = real_d_loss + fake_d_loss
@@ -67,7 +67,6 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
 
             # Generator
             g_optimizer.zero_grad()
-            d_optimizer.zero_grad()
             z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
             fake_images = G.forward(z)
             out = D.forward(fake_images)
