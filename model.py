@@ -38,15 +38,15 @@ class DCGANModelDiscriminator(nn.Module):
             nn.Conv2d(1, 64, 3, stride=2, padding=2),
             # nn.BatchNorm2d(64),
             nn.LeakyReLU(negative_slope=0.2),
-            nn.Dropout2d(0.5),
+            #nn.Dropout2d(0.5),
             nn.Conv2d(64, 128, 3, stride=2, padding=2, bias=False),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(negative_slope=0.2),
-            nn.Dropout2d(0.5),
+            #nn.Dropout2d(0.5),
             nn.Conv2d(128, 256, 3, stride=2, padding=2, bias=False),
             nn.BatchNorm2d(256),
             nn.LeakyReLU(negative_slope=0.2),
-            nn.Dropout2d(0.5),
+            #nn.Dropout2d(0.5),
             nn.Conv2d(256, 1, 4, stride=4),
             # nn.Sigmoid()
         )
