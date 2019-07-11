@@ -8,6 +8,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import model
 import pickle
+import numpy as np
 
 
 @click.command()
@@ -47,35 +48,47 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
         generator_loss = 0
         discriminator_loss = 0
         g_acc = 0
+        skip = True
         for real_images, y_label in trainloader:
             real_images = real_images.to(device)
 
             # Discriminator
-            d_optimizer.zero_grad()
+            if skip:
+                d_optimizer.zero_grad()
 
-            z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
-            fake_images = G.forward(z)
+                # z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
+                z = np.random.uniform(-1, 1, size=(batch_size, latent_vector))
+                z = torch.from_numpy(z).float().to(device)
+                fake_images = G.forward(z)
 
-            # Real images
-            real_out = D.forward(real_images)
-            real_d_loss = criterion(real_out, torch.ones_like(y_label, dtype=torch.float32, device=device) * 0.9)
-            fake_out = D.forward(fake_images)
-            fake_d_loss = criterion(fake_out, torch.zeros_like(y_label, dtype=torch.float32, device=device))
-            d_loss = real_d_loss + fake_d_loss
-            d_loss.backward()
-            d_optimizer.step()
+                # Real images
+                real_out = D.forward(real_images)
+                real_d_loss = criterion(real_out, torch.ones_like(y_label, dtype=torch.float32, device=device) * 0.9)
+                fake_out = D.forward(fake_images)
+                fake_d_loss = criterion(fake_out, torch.zeros_like(y_label, dtype=torch.float32, device=device))
+                d_loss = real_d_loss + fake_d_loss
+                d_loss.backward()
+                d_optimizer.step()
 
             # Generator
             g_optimizer.zero_grad()
-            z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
+            # z = torch.rand((batch_size, latent_vector), device=device) * 2 - 1
+            z = np.random.uniform(-1, 1, size=(batch_size, latent_vector))
+            z = torch.from_numpy(z).float().to(device)
             fake_images = G.forward(z)
             out = D.forward(fake_images)
             gloss = criterion(out, torch.ones_like(out, dtype=torch.float32, device=device))
 
             gloss.backward()
-            g_optimizer.step()
+            g_batch_acc = torch.sum(torch.round(torch.sigmoid(out))) / batch_size
+            g_acc += g_batch_acc
 
-            g_acc += torch.sum(torch.round(torch.sigmoid(out))) / batch_size
+            if True:
+                g_optimizer.step()
+                skip = True
+            else:
+                skip = True
+
             generator_loss += gloss.item()
             discriminator_loss += d_loss.item()
 
