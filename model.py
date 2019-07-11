@@ -3,6 +3,28 @@ import torch.nn.functional as F
 import torch
 
 
+class LinearModelGenerator(nn.Module):
+    def __init__(self, latent_dim):
+        super(LinearModelGenerator, self).__init__()
+
+        self.latent_dim = latent_dim
+        self.linear = nn.Sequential(
+            nn.Linear(latent_dim, 4 * 32 * 32),
+            nn.BatchNorm1d(4 * 32 * 32),
+            nn.ReLU(),
+            nn.Linear(4 * 32 * 32, 2 * 32 * 32),
+            nn.BatchNorm1d(2 * 32 * 32),
+            nn.ReLU(),
+            nn.Linear(2 * 32 * 32, 32 * 32),
+            nn.Tanh()
+        )
+
+    def forward(self, x):
+        x = self.linear(x)
+
+        return x.view(-1, 32, 32)
+
+
 class DCGANModelGenerator(nn.Module):
     def __init__(self, latent_dim):
         super(DCGANModelGenerator, self).__init__()
@@ -25,7 +47,7 @@ class DCGANModelGenerator(nn.Module):
     def forward(self, x):
         x = self.project(x)
         x = F.relu(x)
-        x = self.conv(x.view(x.shape[0], -1, 4, 4))
+        x = self.conv(x.view(-1, 256, 4, 4))
 
         return x
 
