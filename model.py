@@ -22,7 +22,7 @@ class LinearModelGenerator(nn.Module):
     def forward(self, x):
         x = self.linear(x)
 
-        return x.view(-1, 32, 32)
+        return x.view(-1, 1, 32, 32)
 
 
 class DCGANModelGenerator(nn.Module):
