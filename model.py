@@ -1,6 +1,5 @@
 import torch.nn as nn
 import torch.nn.functional as F
-import torch
 
 
 class LinearModelGenerator(nn.Module):
@@ -9,13 +8,13 @@ class LinearModelGenerator(nn.Module):
 
         self.latent_dim = latent_dim
         self.linear = nn.Sequential(
-            nn.Linear(latent_dim, 4 * 32 * 32),
-            nn.BatchNorm1d(4 * 32 * 32),
+            nn.Linear(latent_dim, 256),
+            nn.BatchNorm1d(256),
             nn.ReLU(),
-            nn.Linear(4 * 32 * 32, 2 * 32 * 32),
-            nn.BatchNorm1d(2 * 32 * 32),
+            nn.Linear(256, 512),
+            nn.BatchNorm1d(512),
             nn.ReLU(),
-            nn.Linear(2 * 32 * 32, 32 * 32),
+            nn.Linear(512, 32 * 32),
             nn.Tanh()
         )
 
