@@ -1,5 +1,5 @@
 import torch
-from model import DCGANModelGenerator
+import model as m
 import click
 
 
@@ -8,7 +8,7 @@ import click
 @click.argument('output-file')
 @click.option('--verbose', default=True)
 def main(input_file, output_file, verbose):
-    model = DCGANModelGenerator(100)
+    model = m.DCGANModelGenerator(100)
     model.load_state_dict(torch.load(input_file))
     model.eval()
 
