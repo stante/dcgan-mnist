@@ -1,0 +1,63 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252"> </head>
+
+  <body>
+      <canvas id="myCanvas" width="32" height="32">
+    <!-- Load ONNX.js -->
+    <script src="https://cdn.jsdelivr.net/npm/onnxjs/dist/onnx.min.js"></script>
+    <script>
+    <!-- Code that consume ONNX.js -->
+      // create a session
+      function getInputs() {
+          const latent_vector = new Float32Array(100).fill(1)
+          return new onnx.Tensor(latent_vector, 'float32', [1, 100])
+      }
+
+      function setBuffer(buffer, tensor) {
+          for (y = 0; y < 32; ++y) {
+              for (x = 0; x < 32; ++x) {
+                  index = y * 32 + x
+                  value = (tensor.get(0, 0, y, x) + 1) / 2 * 255
+                  // console.log(tensor.get(0, 0, x, y));
+                  buffer[index * 4] = value
+                  buffer[index * 4 + 1] = value
+                  buffer[index * 4 + 2] = value
+                  buffer[index * 4 + 3] = 255
+              }
+          }
+      }
+
+      buffer = new Uint8ClampedArray(32 * 32 * 4).fill(255);
+      c = document.getElementById("myCanvas");
+      ctx = c.getContext("2d");
+      ctx.scale(10, 10)
+      idata = ctx.createImageData(32, 32);
+
+
+      const session = new onnx.InferenceSession();
+      // load the ONNX model file
+      session.loadModel("https://rdwr.org/generator.onnx").then(() => {
+        // generate model input
+        const inferenceInputs = getInputs();
+        console.log(`model input tensor: ${inferenceInputs.data}.`);
+        // execute the model
+        session.run([inferenceInputs]).then(output => {
+          // consume the output
+          const outputTensor = output.values().next().value;
+          console.log(`Before: ${buffer}`)
+          setBuffer(buffer, outputTensor)
+          console.log(`After: ${buffer}`)
+          // console.log(`model output: ${outputTensor.data.length}`)
+          console.log(`model output tensor: ${outputTensor.data}.`);
+          idata.data.set(buffer);
+
+          // update canvas with new data
+          ctx.putImageData(idata, 0, 0);
+        });
+      });
+
+
+    </script>
+
+
+</body></html>
