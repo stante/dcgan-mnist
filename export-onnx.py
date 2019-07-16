@@ -8,8 +8,9 @@ import click
 @click.argument('output-file')
 @click.option('--verbose', default=True)
 def main(input_file, output_file, verbose):
-    model = m.DCGANModelGenerator(100)
-    model.load_state_dict(torch.load(input_file))
+    loaded_model = torch.load(input_file)
+    model = m.LinearModelGenerator(loaded_model['latent_dim'])
+    model.load_state_dict(loaded_model['state_dict'])
     model.eval()
 
     z = torch.rand((1, 100)) * 2 - 1

@@ -31,7 +31,7 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
     trainloader = dataloader.DataLoader(dataset=trainset, batch_size=batch_size, shuffle=True, drop_last=True)
     testloader = dataloader.DataLoader(dataset=testset, batch_size=batch_size, shuffle=True, drop_last=True)
 
-    G = model.DCGANModelGenerator(latent_vector)
+    G = model.LinearModelGenerator(latent_vector)
     D = model.DCGANModelDiscriminator()
     G.to(device)
     D.to(device)
@@ -103,7 +103,10 @@ def main(root, epochs, batch_size, latent_vector, disable_cuda):
     with open('generated_images.pkl', 'wb') as f:
         pickle.dump(images, f)
 
-    torch.save(G.state_dict(), "generator.pth")
+    torch.save({
+                'latent_dim': latent_vector,
+                'state_dict': G.state_dict()
+               }, "generator.pth")
 
 
 def draw_image(generator, z):
