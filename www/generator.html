@@ -2,7 +2,14 @@
 <meta http-equiv="content-type" content="text/html; charset=windows-1252"> </head>
 
   <body>
-      <canvas id="myCanvas" width="32" height="32"></canvas>
+    <style type="text/css">
+        canvas {
+            border: 1px solid black;
+            height: 240px;
+            width: 240px;
+        }
+    </style>
+    <canvas id="myCanvas" width="32" height="32"></canvas>
 
     <!-- Load ONNX.js -->
     <script src="https://cdn.jsdelivr.net/npm/onnxjs/dist/onnx.min.js"></script>
