@@ -19,23 +19,18 @@ function getInputs() {
 
 function evaluateModel() {
     modelLoaded.then(() => {
-    // generate model input
-    const inferenceInputs = getInputs();
-    //console.log(`model input tensor: ${inferenceInputs.data}.`);
-    // execute the model
-    session.run([inferenceInputs]).then(output => {
-        // consume the output
-        const outputTensor = output.values().next().value;
-        //console.log(`Before: ${buffer}`)
-        setBuffer(buffer, outputTensor)
-        //console.log(`After: ${buffer}`)
-        // console.log(`model output: ${outputTensor.data.length}`)
-        //console.log(`model output tensor: ${outputTensor.data}.`);
-        idata.data.set(buffer);
+        // generate model input
+        const inferenceInputs = getInputs();
+        // execute the model
+        session.run([inferenceInputs]).then(output => {
+            // consume the output
+            const outputTensor = output.values().next().value;
+            setBuffer(buffer, outputTensor)
+            idata.data.set(buffer);
 
-        // update canvas with new data
-        ctx.putImageData(idata, 0, 0);
-    });
+            // update canvas with new data
+            ctx.putImageData(idata, 0, 0);
+        });
     });
 }
 
