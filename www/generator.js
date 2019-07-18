@@ -1,10 +1,20 @@
-// create a session
+function createLatentVector(size) {
+    var latent_vector = new Float32Array(size);
+
+    for (i = 0; i < latent_vector.length; ++i) {
+        latent_vector[i] = Math.random()
+    }
+
+    return new onnx.Tensor(latent_vector, 'float32', [1, size])
+}
+
+var latent_vector = createLatentVector(100)
+
 function getInputs() {
     var slider = document.getElementById("myRange");
-    var latent_vector = new Float32Array(100).fill(1)
-    latent_vector[3] = slider.value
-    latent_vector[1] = slider.value
-    return new onnx.Tensor(latent_vector, 'float32', [1, 100])
+    latent_vector.set(Number(slider.value), 0, 12)
+
+    return latent_vector
 }
 
 function setBuffer(buffer, tensor) {
