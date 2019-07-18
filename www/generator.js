@@ -1,14 +1,15 @@
-function createLatentVector(size) {
+function createLatentVector(dims) {
+    var size = dims.reduce((a, b) => a * b, 1)
     var latent_vector = new Float32Array(size);
 
     for (i = 0; i < latent_vector.length; ++i) {
         latent_vector[i] = Math.random() * 2 - 1
     }
 
-    return new onnx.Tensor(latent_vector, 'float32', [1, size])
+    return new onnx.Tensor(latent_vector, 'float32', dims)
 }
 
-
+http://localhost:5000/generator
 function getInputs() {
     var slider = document.getElementById("myRange");
     latent_vector.set(Number(slider.value), 0, 12)
@@ -49,7 +50,7 @@ function setBuffer(buffer, tensor) {
     }
 }
 
-var latent_vector = createLatentVector(100)
+var latent_vector = createLatentVector([1, 100])
 
 
 
