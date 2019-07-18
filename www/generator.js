@@ -2,7 +2,7 @@ function createLatentVector(size) {
     var latent_vector = new Float32Array(size);
 
     for (i = 0; i < latent_vector.length; ++i) {
-        latent_vector[i] = Math.random()// * 2 - 1
+        latent_vector[i] = Math.random() * 2 - 1
     }
 
     return new onnx.Tensor(latent_vector, 'float32', [1, size])
@@ -59,8 +59,8 @@ ctx = canvas.getContext("2d");
 idata = ctx.createImageData(32, 32);
 
 const session = new onnx.InferenceSession()
-// load the ONNX model file
 
+// load the ONNX model file
 modelLoaded = session.loadModel("http://localhost:5000/generator.onnx");
 modelLoaded.then(evaluateModel())
 
